@@ -1,9 +1,10 @@
+import datetime
 import re
 import tkinter as tk
 from tkinter import messagebox, ttk
 from sqlalchemy import func, literal
 
-from backend.Operations import Inventory, Business_operations
+from backend.Operations import Inventory, Sales, Business_operations
 from backend.Declarations import Db_class_declarations as DB
 
 
@@ -94,11 +95,16 @@ class ERP:
             obj = DB.session.query(DB.DBItem).filter_by(id=re.search(r'\[(.?)]', item).group(1)).first()
             arr_obj[i] = obj
 
-        sale = Business_operations.process_sale(DB.session, "customer", arr_obj)
-        for obj in arr_obj:
-            detail = DB.DBSaleDetail(sale_id=sale.id, item_id=obj.id, amount=1)
-            DB.session.add(detail)
-            DB.session.commit()
+        sale = Sales.add_sale(session=DB.session, customer="TODO", total=3.3, date=datetime.date)
+        if isinstance(sale, DB.DBSale):
+            for obj in arr_obj:
+                detail = DB.DBSaleDetail(sale_id=sale.id, item_id=obj.id, amount=1)
+                DB.session.add(detail)
+                DB.session.commit()
+
+            #TODO: ...
+        else:
+            messagebox.showinfo(f"Error", f'An error has occurred: \n{result}')
 
 
     def add_item(self):
@@ -107,7 +113,7 @@ class ERP:
         item_price = float(self.item_price_input.get())
 
         result = Inventory.add_item(session=DB.session, name=item_name, amount=item_amount, price=item_price)
-        if result == "Success":
+        if isinstance(result, DB.DBItem):
             messagebox.showinfo("Item added successfully",
                                 f"Item added: {item_name} \n"
                                 f"{item_amount} stock at EUR {item_price}/Unity \n"

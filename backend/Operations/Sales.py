@@ -2,10 +2,13 @@ from backend.Declarations import Db_class_declarations as DB
 
 
 def add_sale(session, customer, total, date):
-    item = DB.DBSale(customer=customer, total=total, date=date)
-    session.add(item)
-    session.commit()
-    return item
+    try:
+        item = DB.DBSale(customer=customer, total=total, date=date)
+        session.add(item)
+        session.commit()
+        return item
+    except Exception as err:
+        return str(err)
 
 
 def get_all_sales(session):

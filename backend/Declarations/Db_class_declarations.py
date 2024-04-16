@@ -34,4 +34,14 @@ class DBSaleDetail(base):
     amount = Column(Integer)
 
 
+class DBUser(base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    identity_card = Column(String)
+    address = Column(String)
+    insert_date = Column(Date)
+
+
 base.metadata.create_all(engine)

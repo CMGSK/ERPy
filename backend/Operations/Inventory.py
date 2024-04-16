@@ -6,7 +6,7 @@ def add_item(session, name, amount, price):
         item = DB.DBItem(name=name, amount=amount, price=price)
         session.add(item)
         session.commit()
-        return "Successful"
+        return item
     except Exception as e:
         return str(e)
 
