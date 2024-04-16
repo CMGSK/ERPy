@@ -18,8 +18,8 @@ class ERP:
         self.tabs.pack(fill='both', expand=True)
 
         self.add_inventory_tab()
-        self.add_sale_tab()
-        self.add_user_tab()
+        self.add_sales_tab()
+        self.add_users_tab()
 
     def add_inventory_tab(self):
         inventory_frame = ttk.Frame(self.tabs)
@@ -37,6 +37,25 @@ class ERP:
         self.item_price_input.pack()
 
         tk.Button(inventory_frame, text="Add New", command=self.add_item).pack()
+
+
+    def add_users_tab(self):
+        users_frame = ttk.Frame(self.tabs)
+        self.tabs.add(users_frame, text="Users management")
+
+        tk.Label(users_frame, text="Add User:").pack()
+        tk.Label(users_frame, text="Name:").pack()
+        self.user_name_input = tk.Entry(users_frame)
+        self.user_name_input.pack()
+        tk.Label(users_frame, text="ID Card Number:").pack()
+        self.user_idcard_input = tk.Entry(users_frame)
+        self.user_idcard_input.pack()
+        tk.Label(users_frame, text="Address:").pack()
+        self.user_address_input = tk.Entry(users_frame)
+        self.user_address_input.pack()
+
+        tk.Button(users_frame, text="Add New", command=self.add_item).pack()
+
 
     def add_sales_tab(self):
         sales_frame = ttk.Frame(self.tabs)
@@ -73,7 +92,7 @@ class ERP:
         self.n_items_sale += 1
 
 
-    def display_selected(self):
+    def display_selected(self, event):
         selected = self.selector.get()
         self.selected_label.config(text=f'Selected Item: {selected}')
 
@@ -104,7 +123,7 @@ class ERP:
 
             #TODO: ...
         else:
-            messagebox.showinfo(f"Error", f'An error has occurred: \n{result}')
+            messagebox.showinfo(f"Error", f'An error has occurred: \n{sale}')
 
 
     def add_item(self):
@@ -112,14 +131,14 @@ class ERP:
         item_amount = int(self.item_amount_input.get())
         item_price = float(self.item_price_input.get())
 
-        result = Inventory.add_item(session=DB.session, name=item_name, amount=item_amount, price=item_price)
-        if isinstance(result, DB.DBItem):
+        item = Inventory.add_item(session=DB.session, name=item_name, amount=item_amount, price=item_price)
+        if isinstance(item, DB.DBItem):
             messagebox.showinfo("Item added successfully",
                                 f"Item added: {item_name} \n"
                                 f"{item_amount} stock at EUR {item_price}/Unity \n"
                                 f"Total value: {item_amount * item_price}")
         else:
-            messagebox.showinfo(f"Error", f'An error has occurred: \n{result}')
+            messagebox.showinfo(f"Error", f'An error has occurred: \n{item}')
 
 
 if __name__ == '__main__':
