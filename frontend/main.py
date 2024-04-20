@@ -1,11 +1,8 @@
 import datetime
 import re
 import customtkinter
-import tkinter as tk
-from tkinter import messagebox, ttk
-from sqlalchemy import func, literal
 
-from backend.Operations import Inventory, Sales, Customers, Business_operations
+from backend.Operations import Inventory, Customers, Business_operations
 from backend.Declarations import Db_class_declarations as DB
 
 root = customtkinter.CTk()
@@ -71,6 +68,36 @@ def add_customer():
         c_warning.configure(text=customer, text_color='red')
 
 
+def add_sale():
+    total = 0
+    customer = p_customers.get()
+    curr = receipt.get("0.0", "end").strip()
+    to_add = []
+    add_cnt = 0
+    print(curr)
+    for line in curr.split('\n'):
+        if re.match(r'.*\w+.*\(x\d+\)', line):
+            continue
+        print(line)
+        item = DB.session.query(DB.DBItem).filter_by(name=line[:line.index('  ')]).first()
+        amount = int(line[line.index('(x'):line.index(')')])
+        total += item.price * amount
+        to_add.append((item.id, amount))
+    sale = Business_operations.process_sale(session=DB.session,
+                                     customer_name=customer,
+                                     items=[DB.session.query(DB.DBItem).filter_by(id=i).first() for i, _ in to_add])
+    for item, amount in to_add:
+        detail = Business_operations.add_detail(session=DB.session, sale=sale.id, item=item, amount=amount)
+        if detail:
+            add_cnt += 1
+    if add_cnt == len(to_add):
+        receipt.delete("0.0", "end")
+        s_warning.configure(text="Sale has been added.", text_color='green')
+        return True
+    else:
+        return False
+
+
 def add_sale_items():
     amount = p_amount.get()
     if not re.match(r"\d+", amount):
@@ -95,10 +122,10 @@ def lessen_sale_items():
     actu = ''
     for p in curr.split('\n'):
         if item not in p and not p == '\n':
-            actu = f'{actu}{p}'
+            actu = f'{actu}{p}\n'
     receipt.configure(state="normal")
     receipt.delete("0.0", "end")
-    receipt.insert("0.0", actu)
+    receipt.insert("0.0", re.sub(r'^\n$', '', actu))
     receipt.configure(state="disabled")
 
 
@@ -258,7 +285,8 @@ customtkinter.CTkLabel(sales_tab, text="Select the costumer:").grid(row=npp('s')
 all_customers = ['[D-481972] Larry K. Tulla',
                  '[F-987240] Miquel Hawk',
                  '[JK00393197P] Paula Perez']
-customtkinter.CTkComboBox(sales_tab, values=all_customers).grid(row=npp('s'), column=0, sticky="ew", columnspan=4)
+p_customers = customtkinter.CTkComboBox(sales_tab, values=all_customers)
+p_customers.grid(row=npp('s'), column=0, sticky="ew", columnspan=4)
 
 customtkinter.CTkLabel(sales_tab, text="Current sale:").grid(row=npp('s'), column=0, sticky='w', pady=(20,0))
 receipt = customtkinter.CTkTextbox(sales_tab)
@@ -279,62 +307,7 @@ p_amount = customtkinter.CTkEntry(sales_tab)
 p_amount.grid(row=npp('s'), column=3, sticky='e', columnspan=1)
 customtkinter.CTkButton(sales_tab, text='Add items to sale', command=add_sale_items).grid(row=s_n, column=1, sticky='w', pady=(20,20), padx=(30,30))
 customtkinter.CTkButton(sales_tab, text='Delete item from sale', command=lessen_sale_items, fg_color='red', hover_color='dark red').grid(row=npp('s'), column=2, sticky='w', pady=(20,20), padx=(30,30))
-customtkinter.CTkButton(sales_tab, text='Create sale', command=lessen_sale_items, fg_color='green', hover_color='dark green').grid(row=npp('s'), column=0, columnspan=4)
+customtkinter.CTkButton(sales_tab, text='Create sale', command=add_sale, fg_color='green', hover_color='dark green').grid(row=npp('s'), column=0, columnspan=4)
 
-
-
-# def add_item_to_sale(self):
-#     self.n_items_sale += 1
-#
-#
-# def display_selected(self, event):
-#     selected = self.selector.get()
-#     self.selected_label.config(text=f'Selected Item: {selected}')
-#
-#
-# def load_items_with_id(self):
-#     return DB.session.query(func.array_agg(func.concat(
-#         literal('['),
-#         DB.DBItem.id, literal('] - '),
-#         DB.DBItem.name
-#     ))).scalar()
-#
-#
-# def add_sale(self):
-#
-#     # TODO: Add the customer and the counter
-#
-#     arr_obj = []
-#     for i, item in enumerate(self.arr_items):
-#         obj = DB.session.query(DB.DBItem).filter_by(id=re.search(r'\[(.?)]', item).group(1)).first()
-#         arr_obj[i] = obj
-#
-#     sale = Sales.add_sale(session=DB.session, customer="TODO", total=3.3, date=datetime.date)
-#     if isinstance(sale, DB.DBSale):
-#         for obj in arr_obj:
-#             detail = DB.DBSaleDetail(sale_id=sale.id, item_id=obj.id, amount=1)
-#             DB.session.add(detail)
-#             DB.session.commit()
-#
-#         #TODO: ...
-#     else:
-#         messagebox.showinfo(f"Error", f'An error has occurred: \n{sale}')
-#
-#
-# def add_item(self):
-#     item_name = self.item_name_input.get()
-#     item_amount = int(self.item_amount_input.get())
-#     item_price = float(self.item_price_input.get())
-#
-#     item = Inventory.add_item(session=DB.session, name=item_name, amount=item_amount, price=item_price)
-#     if isinstance(item, DB.DBItem):
-#         messagebox.showinfo("Item added successfully",
-#                             f"Item added: {item_name} \n"
-#                             f"{item_amount} stock at EUR {item_price}/Unity \n"
-#                             f"Total value: {item_amount * item_price}")
-#     else:
-#         messagebox.showinfo(f"Error", f'An error has occurred: \n{item}')
-#
-#
 
 root.mainloop()

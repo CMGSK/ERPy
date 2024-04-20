@@ -1,4 +1,4 @@
-import datetime
+from datetime import date
 
 from backend.Declarations import Db_class_declarations as DB
 
@@ -14,8 +14,15 @@ def process_sale(session, customer_name, items):
         else:
             raise ValueError(f'Not enough stock of item {instance.id}:{instance.name}')
 
-    sale = DB.DBSale(customer_name=customer_name, total=total, date=datetime.date)
+    sale = DB.DBSale(customer=customer_name, total=total, date=date.today())
     session.add(sale)
     session.commit()
     return sale
+
+
+def add_detail(session, sale, item, amount):
+    detail = DB.DBSaleDetail(sale_id=sale, item_id=item, amount=amount)
+    session.add(detail)
+    session.commit()
+    return session
 
