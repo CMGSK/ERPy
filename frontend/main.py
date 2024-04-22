@@ -1,9 +1,14 @@
+import os
 import datetime
 import re
 import customtkinter
 
 from backend.Operations import Inventory, Customers, Business_operations
 from backend.Declarations import Db_class_declarations as DB
+from backend.Declarations import Db_utils as dbutil
+
+
+session = dbutil.generate_session()
 
 root = customtkinter.CTk()
 root.title("Company name")
@@ -44,7 +49,7 @@ def add_inventory():
     stock = int(i_stock.get())
     price = float(i_price.get())
 
-    item = Inventory.add_item(session=DB.session, name=item, amount=stock, price=price)
+    item = Inventory.add_item(session=session, name=item, amount=stock, price=price)
     if isinstance(item, DB.DBItem):
         i_warning.configure(text = "Item added successfully\n\n"
                             f"Item added: {item} \n"
@@ -60,7 +65,7 @@ def add_customer():
     idcard = c_idcard.get()
     address = c_address.get()
 
-    customer = Customers.add_customer(session=DB.session, name=name, identity_card=idcard, address=address)
+    customer = Customers.add_customer(session=session, name=name, identity_card=idcard, address=address)
     if isinstance(customer, DB.DBCustomer):
         c_warning.configure(text = "Customer added successfully",
                             text_color='green')
@@ -79,15 +84,15 @@ def add_sale():
         if re.match(r'.*\w+.*\(x\d+\)', line):
             continue
         print(line)
-        item = DB.session.query(DB.DBItem).filter_by(name=line[:line.index('  ')]).first()
+        item = session.query(DB.DBItem).filter_by(name=line[:line.index('  ')]).first()
         amount = int(line[line.index('(x'):line.index(')')])
         total += item.price * amount
         to_add.append((item.id, amount))
-    sale = Business_operations.process_sale(session=DB.session,
+    sale = Business_operations.process_sale(session=session,
                                      customer_name=customer,
-                                     items=[DB.session.query(DB.DBItem).filter_by(id=i).first() for i, _ in to_add])
+                                     items=[session.query(DB.DBItem).filter_by(id=i).first() for i, _ in to_add])
     for item, amount in to_add:
-        detail = Business_operations.add_detail(session=DB.session, sale=sale.id, item=item, amount=amount)
+        detail = Business_operations.add_detail(session=session, sale=sale.id, item=item, amount=amount)
         if detail:
             add_cnt += 1
     if add_cnt == len(to_add):
@@ -148,7 +153,7 @@ def npp(n: str):
 
 
 def pop_floating_items():
-    #data = Inventory.get_all_items(DB.session)
+    #data = Inventory.get_all_items(session)
     data = [
         DB.DBItem(name="Thing 1",amount=39,price=9.7),
         DB.DBItem(name="Thing 2",amount=97,price=0.4),
@@ -176,7 +181,7 @@ def pop_floating_items():
 
 
 def pop_floating_customers():
-    # data = Customers.get_all_customers(DB.session)
+    # data = Customers.get_all_customers(session)
     data= [
         DB.DBCustomer(name="Test 1", identity_card="Test 1", address="Test 1",insert_date=datetime.date),
         DB.DBCustomer(name="Test 2", identity_card="Test 2", address="Test 2",insert_date=datetime.date),
@@ -206,7 +211,7 @@ def pop_floating_customers():
 
 
 def pop_floating_sales():
-    # data = Sales.get_all_sales(DB.session)
+    # data = Sales.get_all_sales(session)
     data = [
         DB.DBSale(customer="Sale 1",total=39,date=datetime.date),
         DB.DBSale(customer="Sale 2",total=97,date=datetime.date),
@@ -231,7 +236,6 @@ def pop_floating_sales():
         customtkinter.CTkLabel(s_float, text=item.customer, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=1, sticky='ew')
         customtkinter.CTkLabel(s_float, text=item.total, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=2, sticky='ew')
         customtkinter.CTkLabel(s_float, text=item.date, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=3, sticky='ew')
-
 
 
 # Items TAB
@@ -281,7 +285,7 @@ s_warning.grid(row=npp('s'), column=0, columnspan=4)
 
 # TODO: add filter
 customtkinter.CTkLabel(sales_tab, text="Select the costumer:").grid(row=npp('s'), column=0, sticky='w')
-# all_customers = [f'[{c.identity_card}] {c.name}' for p in Inventory.get_all_items(DB.session)]
+# all_customers = [f'[{c.identity_card}] {c.name}' for p in Inventory.get_all_items(session)]
 all_customers = ['[D-481972] Larry K. Tulla',
                  '[F-987240] Miquel Hawk',
                  '[JK00393197P] Paula Perez']
@@ -295,7 +299,7 @@ receipt.grid(row=npp('s'), column=0, sticky='ew', columnspan=4)
 # TODO: add filter
 customtkinter.CTkLabel(sales_tab, text="Select item to add:").grid(row=s_n, column=0, sticky='w')
 customtkinter.CTkLabel(sales_tab, text="Select amount:").grid(row=npp('s'), column=3)
-# all_products = [f'{p.name}' for p in Inventory.get_all_items(DB.session)]
+# all_products = [f'{p.name}' for p in Inventory.get_all_items(session)]
 all_products = ['Product example 1 - 10Ud.',
                 'Product example 1',
                 'Product example 2',
