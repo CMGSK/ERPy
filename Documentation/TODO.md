@@ -22,7 +22,7 @@ Categories for this tasks can be:
 - **B**ug
 - **D**ocumentation
 
-#### CMGSK - High Priority
+#### High Priority
 
 - **N**: Define paths for local/online database
 - **N**: Define paths for different database engines
@@ -38,13 +38,16 @@ Categories for this tasks can be:
 - **F**: Create a util that store logging of the app processes for debug, history and so on, and place calls to it all
   over the codebase
 
-#### CMGSK - High Priority
+#### Mid Priority
 
 - **N**: Create an Log-in system for different workers
+- **I**: Refactor the god damn file naming, im just too stupid for naming properly
 - **F**: Create a configuration window that allow us to define the tables shape, and maybe other useful things such as
   colors, behaviours, and so on
+- **I**: Polish the GUI
 
-#### CMGSK - Low Priority
+#### Low Priority
 
 - **D**: Create a playground with different things from customtkinter to use as a reference and to know the different
 - **I**: Define permissions for different roles of user
+- **I**: Pytesting the whole thing would really be interesting
