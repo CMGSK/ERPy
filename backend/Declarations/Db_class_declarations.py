@@ -1,8 +1,48 @@
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, Integer, Float, Date, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-engine = create_engine('sqlite:///database/erp.db', echo=True)
+load_dotenv(Path('../.cfg/.env'))
+match engine_selection := os.getenv("DB_ENGINE"):
+    case "mysql":
+        usr = os.getenv("DB_USER")
+        pwd = os.getenv("DB_PASSWORD")
+        adr = os.getenv("DB_CON_ADDR")
+        por = os.getenv("DB_PORT")
+        sch = os.getenv("DB_NAME")
+        engine = create_engine(f'mysql+pymysql://{usr}:{pwd}@{adr}:{por}/{sch}')
+
+    case "sqlite":
+        uri = os.getenv("DB_LOCATION")
+        sch = os.getenv("DB_NAME")
+        engine = create_engine(f'sqlite:///{uri}/{sch}.db', echo=True)
+
+    case "postgresql":
+        usr = os.getenv("DB_USER")
+        pwd = os.getenv("DB_PASSWORD")
+        adr = os.getenv("DB_CON_ADDR")
+        por = os.getenv("DB_PORT")
+        sch = os.getenv("DB_NAME")
+        engine = create_engine(f'postgresql://{usr}:{pwd}@{adr}:{por}/{sch}')
+
+    case "sqlserver":
+        # We may deprecate the ability to connect to MSSQLS because they're a bunch of fucks and
+        # drivers are un-fucking-reliable and complicated as hell and will cause more problems than anything else
+        usr = os.getenv("DB_USER")
+        pwd = os.getenv("DB_PASSWORD")
+        adr = os.getenv("DB_CON_ADDR")
+        por = os.getenv("DB_PORT")
+        sch = os.getenv("DB_NAME")
+        ver = os.getenv("DB_MSSQL_VER")
+        engine = create_engine(f'mssql+pyodbc://{usr}:{pwd}@{adr}:{por}/{sch}?driver=ODBC+Driver+{ver}+for+SQL+Server')
+
+    case default:
+        raise "Undefined database engine"
+
 Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()

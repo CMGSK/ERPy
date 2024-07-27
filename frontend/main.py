@@ -1,19 +1,20 @@
 import datetime
 import re
+
 import customtkinter
 
-from backend.Operations import Inventory, Customers, Business_operations
 from backend.Declarations import Db_class_declarations as DB
+from backend.Operations import Inventory, Customers, Business_operations
 
 root = customtkinter.CTk()
 root.title("Company name")
 root.attributes('-type', 'dialog')
 root.resizable(False, False)
 root.geometry('800x600')
-root.grid_columnconfigure((0), weight=1)
+root.grid_columnconfigure(0, weight=1)
 
 tab_view = customtkinter.CTkTabview(root)
-tab_view.grid(row=1, padx=40, pady=(10,40), sticky='ew')
+tab_view.grid(row=1, padx=40, pady=(10, 40), sticky='ew')
 
 sales_tab = tab_view.add("Sales")
 clients_tab = tab_view.add("Customers")
@@ -46,11 +47,11 @@ def add_inventory():
 
     item = Inventory.add_item(session=DB.session, name=item, amount=stock, price=price)
     if isinstance(item, DB.DBItem):
-        i_warning.configure(text = "Item added successfully\n\n"
-                            f"Item added: {item} \n"
-                            f"{stock} stock at EUR {price}/Unity \n"
-                            f"Total value: {stock * price}",
-                          text_color='green')
+        i_warning.configure(text="Item added successfully\n\n"
+                                 f"Item added: {item} \n"
+                                 f"{stock} stock at EUR {price}/Unity \n"
+                                 f"Total value: {stock * price}",
+                            text_color='green')
     else:
         i_warning.configure(text=item, text_color='red')
 
@@ -62,7 +63,7 @@ def add_customer():
 
     customer = Customers.add_customer(session=DB.session, name=name, identity_card=idcard, address=address)
     if isinstance(customer, DB.DBCustomer):
-        c_warning.configure(text = "Customer added successfully",
+        c_warning.configure(text="Customer added successfully",
                             text_color='green')
     else:
         c_warning.configure(text=customer, text_color='red')
@@ -84,8 +85,9 @@ def add_sale():
         total += item.price * amount
         to_add.append((item.id, amount))
     sale = Business_operations.process_sale(session=DB.session,
-                                     customer_name=customer,
-                                     items=[DB.session.query(DB.DBItem).filter_by(id=i).first() for i, _ in to_add])
+                                            customer_name=customer,
+                                            items=[DB.session.query(DB.DBItem).filter_by(id=i).first() for i, _ in
+                                                   to_add])
     for item, amount in to_add:
         detail = Business_operations.add_detail(session=DB.session, sale=sale.id, item=item, amount=amount)
         if detail:
@@ -110,7 +112,7 @@ def add_sale_items():
     item = p_name.get()
     receipt.configure(state="normal")
     curr = receipt.get("0.0", "end")
-    text=f'{curr} - {item} \t\t\t\t\t(x{amount})'
+    text = f'{curr} - {item} \t\t\t\t\t(x{amount})'
     receipt.delete("0.0", "end")
     receipt.insert("0.0", text)
     receipt.configure(state="disabled")
@@ -148,90 +150,116 @@ def npp(n: str):
 
 
 def pop_floating_items():
-    #data = Inventory.get_all_items(DB.session)
+    # data = Inventory.get_all_items(DB.session)
     data = [
-        DB.DBItem(name="Thing 1",amount=39,price=9.7),
-        DB.DBItem(name="Thing 2",amount=97,price=0.4),
-        DB.DBItem(name="Thing 3",amount=49,price=1.7),
-        DB.DBItem(name="Thing 4",amount=37,price=6.4),
-        DB.DBItem(name="Thing 5",amount=29,price=4.7),
-        DB.DBItem(name="Thing 6",amount=17,price=5.4)
+        DB.DBItem(name="Thing 1", amount=39, price=9.7),
+        DB.DBItem(name="Thing 2", amount=97, price=0.4),
+        DB.DBItem(name="Thing 3", amount=49, price=1.7),
+        DB.DBItem(name="Thing 4", amount=37, price=6.4),
+        DB.DBItem(name="Thing 5", amount=29, price=4.7),
+        DB.DBItem(name="Thing 6", amount=17, price=5.4)
     ]
     i_float = customtkinter.CTkToplevel(root)
     i_float.geometry('400x300')
     i_float.title("Company name")
     i_float.attributes('-type', 'dialog')
     i_float.resizable(False, False)
-    i_float.grid_columnconfigure((0,1,2,3), weight=1)
+    i_float.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
-    customtkinter.CTkLabel(i_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0, sticky='ew')
-    customtkinter.CTkLabel(i_float, text="Item", bg_color='dark grey', text_color='white').grid(row=0, column=1, sticky='ew')
-    customtkinter.CTkLabel(i_float, text="Stock", bg_color='dark grey', text_color='white').grid(row=0, column=2, sticky='ew')
-    customtkinter.CTkLabel(i_float, text="Price", bg_color='dark grey', text_color='white').grid(row=0, column=3, sticky='ew')
+    customtkinter.CTkLabel(i_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0,
+                                                                                              sticky='ew')
+    customtkinter.CTkLabel(i_float, text="Item", bg_color='dark grey', text_color='white').grid(row=0, column=1,
+                                                                                                sticky='ew')
+    customtkinter.CTkLabel(i_float, text="Stock", bg_color='dark grey', text_color='white').grid(row=0, column=2,
+                                                                                                 sticky='ew')
+    customtkinter.CTkLabel(i_float, text="Price", bg_color='dark grey', text_color='white').grid(row=0, column=3,
+                                                                                                 sticky='ew')
     for idx, item in enumerate(data):
-        customtkinter.CTkLabel(i_float, text=item.id, bg_color='light grey' if idx%2==0 else 'light blue', text_color='black').grid(row=idx+1, column=0, sticky='ew')
-        customtkinter.CTkLabel(i_float, text=item.name, bg_color='light grey' if idx%2==0 else 'light blue', text_color='black').grid(row=idx+1, column=1, sticky='ew')
-        customtkinter.CTkLabel(i_float, text=item.amount, bg_color='light grey' if idx%2==0 else 'light blue', text_color='black').grid(row=idx+1, column=2, sticky='ew')
-        customtkinter.CTkLabel(i_float, text=item.price, bg_color='light grey' if idx%2==0 else 'light blue', text_color='black').grid(row=idx+1, column=3, sticky='ew')
+        customtkinter.CTkLabel(i_float, text=item.id, bg_color='light grey' if idx % 2 == 0 else 'light blue',
+                               text_color='black').grid(row=idx + 1, column=0, sticky='ew')
+        customtkinter.CTkLabel(i_float, text=item.name, bg_color='light grey' if idx % 2 == 0 else 'light blue',
+                               text_color='black').grid(row=idx + 1, column=1, sticky='ew')
+        customtkinter.CTkLabel(i_float, text=item.amount, bg_color='light grey' if idx % 2 == 0 else 'light blue',
+                               text_color='black').grid(row=idx + 1, column=2, sticky='ew')
+        customtkinter.CTkLabel(i_float, text=item.price, bg_color='light grey' if idx % 2 == 0 else 'light blue',
+                               text_color='black').grid(row=idx + 1, column=3, sticky='ew')
 
 
 def pop_floating_customers():
     # data = Customers.get_all_customers(DB.session)
-    data= [
-        DB.DBCustomer(name="Test 1", identity_card="Test 1", address="Test 1",insert_date=datetime.date),
-        DB.DBCustomer(name="Test 2", identity_card="Test 2", address="Test 2",insert_date=datetime.date),
-        DB.DBCustomer(name="Test 3", identity_card="Test 3", address="Test 3",insert_date=datetime.date),
-        DB.DBCustomer(name="Test 4", identity_card="Test 4", address="Test 4",insert_date=datetime.date),
-        DB.DBCustomer(name="Test 5", identity_card="Test 5", address="Test 5",insert_date=datetime.date),
-        DB.DBCustomer(name="Test 6", identity_card="Test 6", address="Test 6",insert_date=datetime.date)
+    data = [
+        DB.DBCustomer(name="Test 1", identity_card="Test 1", address="Test 1", insert_date=datetime.date),
+        DB.DBCustomer(name="Test 2", identity_card="Test 2", address="Test 2", insert_date=datetime.date),
+        DB.DBCustomer(name="Test 3", identity_card="Test 3", address="Test 3", insert_date=datetime.date),
+        DB.DBCustomer(name="Test 4", identity_card="Test 4", address="Test 4", insert_date=datetime.date),
+        DB.DBCustomer(name="Test 5", identity_card="Test 5", address="Test 5", insert_date=datetime.date),
+        DB.DBCustomer(name="Test 6", identity_card="Test 6", address="Test 6", insert_date=datetime.date)
     ]
     c_float = customtkinter.CTkToplevel(root)
     c_float.geometry('400x300')
     c_float.title("Company name")
     c_float.attributes('-type', 'dialog')
     c_float.resizable(False, False)
-    c_float.grid_columnconfigure((0,1,2,3,4), weight=1)
+    c_float.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
-    customtkinter.CTkLabel(c_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0, sticky='ew')
-    customtkinter.CTkLabel(c_float, text="Name", bg_color='dark grey', text_color='white').grid(row=0, column=1, sticky='ew')
-    customtkinter.CTkLabel(c_float, text="Id Card", bg_color='dark grey', text_color='white').grid(row=0, column=2, sticky='ew')
-    customtkinter.CTkLabel(c_float, text="Address", bg_color='dark grey', text_color='white').grid(row=0, column=3, sticky='ew')
-    customtkinter.CTkLabel(c_float, text="Insert date", bg_color='dark grey', text_color='white').grid(row=0, column=4, sticky='ew')
+    customtkinter.CTkLabel(c_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0,
+                                                                                              sticky='ew')
+    customtkinter.CTkLabel(c_float, text="Name", bg_color='dark grey', text_color='white').grid(row=0, column=1,
+                                                                                                sticky='ew')
+    customtkinter.CTkLabel(c_float, text="Id Card", bg_color='dark grey', text_color='white').grid(row=0, column=2,
+                                                                                                   sticky='ew')
+    customtkinter.CTkLabel(c_float, text="Address", bg_color='dark grey', text_color='white').grid(row=0, column=3,
+                                                                                                   sticky='ew')
+    customtkinter.CTkLabel(c_float, text="Insert date", bg_color='dark grey', text_color='white').grid(row=0, column=4,
+                                                                                                       sticky='ew')
     for idx, item in enumerate(data):
-        customtkinter.CTkLabel(c_float, text=item.id, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=0, sticky='ew')
-        customtkinter.CTkLabel(c_float, text=item.name, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=1, sticky='ew')
-        customtkinter.CTkLabel(c_float, text=item.identity_card, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=2, sticky='ew')
-        customtkinter.CTkLabel(c_float, text=item.address, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=3, sticky='ew')
-        customtkinter.CTkLabel(c_float, text=item.insert_date, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=4, sticky='ew')
+        customtkinter.CTkLabel(c_float, text=item.id, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=0, sticky='ew')
+        customtkinter.CTkLabel(c_float, text=item.name, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=1, sticky='ew')
+        customtkinter.CTkLabel(c_float, text=item.identity_card,
+                               bg_color='light grey' if idx % 2 == 0 else "light blue", text_color='black').grid(
+            row=idx + 1, column=2, sticky='ew')
+        customtkinter.CTkLabel(c_float, text=item.address, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=3, sticky='ew')
+        customtkinter.CTkLabel(c_float, text=item.insert_date, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=4, sticky='ew')
 
 
 def pop_floating_sales():
     # data = Sales.get_all_sales(DB.session)
     data = [
-        DB.DBSale(customer="Sale 1",total=39,date=datetime.date),
-        DB.DBSale(customer="Sale 2",total=97,date=datetime.date),
-        DB.DBSale(customer="Sale 3",total=49,date=datetime.date),
-        DB.DBSale(customer="Sale 4",total=37,date=datetime.date),
-        DB.DBSale(customer="Sale 5",total=29,date=datetime.date),
-        DB.DBSale(customer="Sale 6",total=17,date=datetime.date)
+        DB.DBSale(customer="Sale 1", total=39, date=datetime.date),
+        DB.DBSale(customer="Sale 2", total=97, date=datetime.date),
+        DB.DBSale(customer="Sale 3", total=49, date=datetime.date),
+        DB.DBSale(customer="Sale 4", total=37, date=datetime.date),
+        DB.DBSale(customer="Sale 5", total=29, date=datetime.date),
+        DB.DBSale(customer="Sale 6", total=17, date=datetime.date)
     ]
     s_float = customtkinter.CTkToplevel(root)
     s_float.geometry('400x300')
     s_float.title("Company name")
     s_float.attributes('-type', 'dialog')
     s_float.resizable(False, False)
-    s_float.grid_columnconfigure((0,1,2,3), weight=1)
+    s_float.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
-    customtkinter.CTkLabel(s_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0, sticky='ew')
-    customtkinter.CTkLabel(s_float, text="Customer", bg_color='dark grey', text_color='white').grid(row=0, column=1, sticky='ew')
-    customtkinter.CTkLabel(s_float, text="Total", bg_color='dark grey', text_color='white').grid(row=0, column=2, sticky='ew')
-    customtkinter.CTkLabel(s_float, text="Date", bg_color='dark grey', text_color='white').grid(row=0, column=3, sticky='ew')
+    customtkinter.CTkLabel(s_float, text="Id", bg_color='dark grey', text_color='white').grid(row=0, column=0,
+                                                                                              sticky='ew')
+    customtkinter.CTkLabel(s_float, text="Customer", bg_color='dark grey', text_color='white').grid(row=0, column=1,
+                                                                                                    sticky='ew')
+    customtkinter.CTkLabel(s_float, text="Total", bg_color='dark grey', text_color='white').grid(row=0, column=2,
+                                                                                                 sticky='ew')
+    customtkinter.CTkLabel(s_float, text="Date", bg_color='dark grey', text_color='white').grid(row=0, column=3,
+                                                                                                sticky='ew')
     for idx, item in enumerate(data):
-        customtkinter.CTkLabel(s_float, text=item.id, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=0, sticky='ew')
-        customtkinter.CTkLabel(s_float, text=item.customer, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=1, sticky='ew')
-        customtkinter.CTkLabel(s_float, text=item.total, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=2, sticky='ew')
-        customtkinter.CTkLabel(s_float, text=item.date, bg_color='light grey' if idx%2==0 else "light blue", text_color='black').grid(row=idx + 1, column=3, sticky='ew')
-
+        customtkinter.CTkLabel(s_float, text=item.id, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=0, sticky='ew')
+        customtkinter.CTkLabel(s_float, text=item.customer, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=1, sticky='ew')
+        customtkinter.CTkLabel(s_float, text=item.total, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=2, sticky='ew')
+        customtkinter.CTkLabel(s_float, text=item.date, bg_color='light grey' if idx % 2 == 0 else "light blue",
+                               text_color='black').grid(row=idx + 1, column=3, sticky='ew')
 
 
 # Items TAB
@@ -251,7 +279,6 @@ i_price.grid(row=npp('i'), column=0)
 
 customtkinter.CTkButton(inventory_tab, text="Add item", command=add_inventory).grid(row=npp('i'), column=0)
 
-
 # Customers TAB
 clients_tab.grid_columnconfigure(0, weight=1)
 # customtkinter.CTkLabel(clients_tab, text="Add Customer:").grid(row=0, column=0)
@@ -269,9 +296,8 @@ c_address.grid(row=npp('c'), column=0)
 
 customtkinter.CTkButton(clients_tab, text="Add customer", command=add_customer).grid(row=npp('c'), column=0)
 
-
 # Sales TAB
-sales_tab.grid_columnconfigure((0), weight=1)
+sales_tab.grid_columnconfigure(0, weight=1)
 # customtkinter.CTkLabel(sales_tab, text="Add Sales").grid(row=0, column=0, columnspan=4)
 s_pop = customtkinter.CTkButton(sales_tab, text="Watch tables", command=pop_floating_sales)
 s_pop.grid(row=npp('s'), column=0, columnspan=4)
@@ -288,7 +314,7 @@ all_customers = ['[D-481972] Larry K. Tulla',
 p_customers = customtkinter.CTkComboBox(sales_tab, values=all_customers)
 p_customers.grid(row=npp('s'), column=0, sticky="ew", columnspan=4)
 
-customtkinter.CTkLabel(sales_tab, text="Current sale:").grid(row=npp('s'), column=0, sticky='w', pady=(20,0))
+customtkinter.CTkLabel(sales_tab, text="Current sale:").grid(row=npp('s'), column=0, sticky='w', pady=(20, 0))
 receipt = customtkinter.CTkTextbox(sales_tab)
 receipt.configure(state='disabled')
 receipt.grid(row=npp('s'), column=0, sticky='ew', columnspan=4)
@@ -305,9 +331,11 @@ p_name = customtkinter.CTkComboBox(sales_tab, values=all_products)
 p_name.grid(row=s_n, column=0, sticky="ew", columnspan=3)
 p_amount = customtkinter.CTkEntry(sales_tab)
 p_amount.grid(row=npp('s'), column=3, sticky='e', columnspan=1)
-customtkinter.CTkButton(sales_tab, text='Add items to sale', command=add_sale_items).grid(row=s_n, column=1, sticky='w', pady=(20,20), padx=(30,30))
-customtkinter.CTkButton(sales_tab, text='Delete item from sale', command=lessen_sale_items, fg_color='red', hover_color='dark red').grid(row=npp('s'), column=2, sticky='w', pady=(20,20), padx=(30,30))
-customtkinter.CTkButton(sales_tab, text='Create sale', command=add_sale, fg_color='green', hover_color='dark green').grid(row=npp('s'), column=0, columnspan=4)
-
+customtkinter.CTkButton(sales_tab, text='Add items to sale', command=add_sale_items).grid(row=s_n, column=1, sticky='w',
+                                                                                          pady=(20, 20), padx=(30, 30))
+customtkinter.CTkButton(sales_tab, text='Delete item from sale', command=lessen_sale_items, fg_color='red',
+                        hover_color='dark red').grid(row=npp('s'), column=2, sticky='w', pady=(20, 20), padx=(30, 30))
+customtkinter.CTkButton(sales_tab, text='Create sale', command=add_sale, fg_color='green',
+                        hover_color='dark green').grid(row=npp('s'), column=0, columnspan=4)
 
 root.mainloop()
