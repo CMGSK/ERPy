@@ -3,8 +3,8 @@ import re
 
 import customtkinter
 
-from backend.Declarations import Db_class_declarations as DB
-from backend.Operations import Inventory, Customers, Business_operations
+from backend.ORM_structures import Inventory, Customers, Business_operations
+from backend.declarations import db_class_declarations as DB
 
 root = customtkinter.CTk()
 root.title("Company name")

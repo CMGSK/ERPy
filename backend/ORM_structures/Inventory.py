@@ -1,4 +1,4 @@
-from backend.Declarations import Db_class_declarations as DB
+from backend.declarations import db_class_declarations as DB
 
 
 def add_item(session, name, amount, price):

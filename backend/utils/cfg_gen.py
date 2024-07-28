@@ -1,4 +1,4 @@
-# from Operations import Configurations
+# from ORM_structures import Configurations
 def generate_from_db():
     cfg_params = []  # Select all from configs where to_env == true
     with open('../.cfg/.env', 'w') as env:

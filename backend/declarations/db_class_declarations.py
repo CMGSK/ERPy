@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, Float, Date, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, Double, Date, String, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 
 load_dotenv(Path('../.cfg/.env'))
 match engine_selection := os.getenv("DB_ENGINE"):
@@ -49,27 +49,106 @@ session = Session()
 base = declarative_base()
 
 
-class DBItem(base):
-    __tablename__ = 'inventory'
+# TODO: Define the foreign keys and the cascade behaviour
+
+
+class DBItems(base):
+    __tablename__ = 'items'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    amount = Column(String)
-    price = Column(Float)
+    description = Column(String)
+    category = Column(String)
+    subcategory = Column(String)
+    brand = Column(String)
+    stock = Column(Integer)
+    business_cost = Column(Double)
+    price = Column(Double)
+    locations = Column(String)
+    barcode = Column(String)
+    tax = Column(Double)
+    tags = Column(String)
+    supplier = Column(String)
+    reorder_at = Column(Integer)
+    minimum = Column(Integer)
+    maximum = Column(Integer)
+    etd = Column(Date)
+    curr_early_expiration = Column(Date)
+    weight = Column(Double)
+    dimensions = Column(String)
+    warranty = Column(Integer)
+    last_update = Column(Date)
+    inserted_at = Column(Date)
+    notes = Column(String)
+    active = Column(Boolean)
 
     def __str__(self):
-        return self.name
+        return f'[{self.id}] {self.name}'
 
 
-class DBSale(base):
-    __tablename__ = 'sales'
+class DBItemsFromOrders(base):
+    __tablename__ = 'items_from_orders'
 
     id = Column(Integer, primary_key=True)
-    customer = Column(String)
-    total = Column(Float)
-    date = Column(Date)
+    id_order = Column(Integer)
+    id_item = Column(Integer)
+    name = Column(String)
+    quantity = Column(Integer)
+    price_unit = Column(Double)
+    discount = Column(Double)
+    price_total = Column(Double)
+    price_net = Column(Double)
+    from_location = Column(String)
+    shipping_address = Column(String)
+    shipping_method = Column(String)
+    shipping_cost = Column(Double)
+    shipping_date = Column(Date)
+    shipping_eta = Column(Date)
+    shipping_arrival = Column(Date)
+    shipping_tracking = Column(String)
+    returned = Column(Boolean)
+    return_reason = Column(String)
+    notes = Column(String)
+    insert_date = Column(Date)
+    update_date = Column(Date)
+    active = Column(Boolean)
 
-    items = relationship(DBItem, secondary='sale_details')
+    def __str__(self):
+        return f'[{self.id}] {self.name}'
+
+
+class DBOrders(base):
+    __tablename__ = 'orders'
+
+    id = Column(Integer, primary_key=True)
+    id_customer = Column(Integer)
+    id_salesperson = Column(Integer)
+    date = Column(Date)
+    status = Column(String)
+    subtotal = Column(Double)
+    discount = Column(Double)
+    price_total = Column(Double)
+    price_net = Column(Double)
+    payment_method = Column(String)
+    payment_status = Column(String)
+    billing_address = Column(String)
+    shipping_address = Column(String)
+    shipping_method = Column(String)
+    shipping_cost = Column(Double)
+    shipping_date = Column(Date)
+    shipping_eta = Column(Date)
+    shipping_arrival = Column(Date)
+    cancelled = Column(Boolean)
+    cancel_reason = Column(String)
+    notes = Column(String)
+    insert_date = Column(Date)
+    update_date = Column(Date)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id}][EUR {self.price_total}] {self.date} '
+
+    # items = relationship(DBItem, secondary='sale_details')
 
 
 class DBSaleDetail(base):
@@ -98,59 +177,6 @@ base.metadata.create_all(engine)
 """
 Ideal structure:
 
-T ---> Items <--- 
-    id
-    name
-    description
-    category
-    subcategory
-    brand
-    stock
-    business_cost
-    price
-    locations
-    barcode
-    tax
-    tags
-    supplier
-    reorder_at
-    minimum
-    maximum
-    etd (estimated time of delivery)
-    curr_early_expiration
-    weight
-    dimensions
-    warranty
-    last_update
-    inserted_at
-    notes
-    active
-
-T ---> Items_from_orders <--- 
-    id
-    id_order
-    id_item 
-    name
-    quantity
-    price_unit
-    discount
-    price_total
-    price_net
-    from_location
-    shipping_address
-    shipping_method
-    shipping_cost
-    shipping_date
-    shipping_eta
-    shipping_arrival
-    shipping_tracking
-    returned
-    return_reason
-    notes
-    insert_date
-    update_date
-    active
-    
 T ---> Orders <--- 
     id
     id_customer

@@ -1,6 +1,6 @@
 from datetime import date
 
-from backend.Declarations import Db_class_declarations as DB
+from backend.declarations import db_class_declarations as DB
 
 
 def process_sale(session, customer_name, items):
@@ -25,4 +25,3 @@ def add_detail(session, sale, item, amount):
     session.add(detail)
     session.commit()
     return session
-
