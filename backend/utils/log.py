@@ -5,9 +5,10 @@ from datetime import datetime
 class Logger:
     log = open('../.log', 'a')
 
-    def debug(self, msg: str) -> None:
+    @classmethod
+    def debug(cls, msg: str) -> None:
         t = datetime.now().strftime('%Y/%m/%d - %H:%M:%S')
-        self.log.write(f'[DBG] {t} => {msg}')
+        cls.log.write(f'[DBG] {t} => {msg}')
 
     def info(self, msg: str) -> None:
         t = datetime.now().strftime('%Y/%m/%d - %H:%M:%S')

@@ -10,6 +10,8 @@ def add_item(session, name, amount, price):
     except Exception as e:
         return str(e)
 
+    DB.DBItem.__annotations__
+
 
 def get_all_items(session):
     return session.query(DB.DBItem).all()

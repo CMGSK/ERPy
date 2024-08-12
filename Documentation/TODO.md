@@ -24,6 +24,7 @@ Categories for this tasks can be:
 
 #### High Priority
 
+- **N**: Define a module to import from .xls and similars
 - **N**: Define paths for local/online database
 - **N**: Define paths for different database engines
 - **N**: Define proper table structures (The database structure will be provided by us, we do not plan on accepting

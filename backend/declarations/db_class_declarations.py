@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, Double, Date, String, Boolean, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, Double, Date, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -52,7 +52,7 @@ base = declarative_base()
 # TODO: Define the foreign keys and the cascade behaviour
 
 
-class DBItems(base):
+class DBItem(base):
     __tablename__ = 'items'
 
     id = Column(Integer, primary_key=True)
@@ -85,8 +85,12 @@ class DBItems(base):
     def __str__(self):
         return f'[{self.id}] {self.name}'
 
+    @classmethod
+    def get_all_attr(cls):
+        return [k for k in cls.__dict__.keys() if not k.startswith('__')]
 
-class DBItemsFromOrders(base):
+
+class DBItemsFromOrder(base):
     __tablename__ = 'items_from_orders'
 
     id = Column(Integer, primary_key=True)
@@ -109,15 +113,15 @@ class DBItemsFromOrders(base):
     returned = Column(Boolean)
     return_reason = Column(String)
     notes = Column(String)
-    insert_date = Column(Date)
-    update_date = Column(Date)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
     active = Column(Boolean)
 
     def __str__(self):
         return f'[{self.id}] {self.name}'
 
 
-class DBOrders(base):
+class DBOrder(base):
     __tablename__ = 'orders'
 
     id = Column(Integer, primary_key=True)
@@ -141,8 +145,8 @@ class DBOrders(base):
     cancelled = Column(Boolean)
     cancel_reason = Column(String)
     notes = Column(String)
-    insert_date = Column(Date)
-    update_date = Column(Date)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
     active = Column(Boolean)
 
     def __str__(self):
@@ -151,12 +155,34 @@ class DBOrders(base):
     # items = relationship(DBItem, secondary='sale_details')
 
 
-class DBSaleDetail(base):
-    __tablename__ = 'sale_details'
+class DBEmployee(base):
+    __tablename__ = 'employees'
 
-    sale_id = Column(Integer, ForeignKey('sales.id'), primary_key=True)
-    item_id = Column(Integer, ForeignKey('inventory.id'), primary_key=True)
-    amount = Column(Integer)
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    surname = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    address = Column(String)
+    city = Column(String)
+    cp = Column(Integer)
+    country = Column(Integer)
+    hiring_date = Column(Date)
+    department = Column(String)
+    position = Column(String)
+    reports_to = Column(Integer)
+    commission = Column(Double)
+    total_sales = Column(Integer)
+    total_holidays = Column(Integer)
+    holidays_left = Column(Integer)
+    status = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id}] {self.name}'
 
 
 class DBCustomer(base):
@@ -164,161 +190,135 @@ class DBCustomer(base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    identity_card = Column(String)
-    address = Column(String)
-    insert_date = Column(Date)
+    surname = Column(String)
+    is_company = Column(Boolean)
+    email = Column(String)
+    phone = Column(String)
+    billing_address = Column(String)
+    billing_cp = Column(Integer)
+    shipping_address = Column(String)
+    shipping_cp = Column(Integer)
+    shipping_country = Column(String)
+    credit_limit = Column(Double)
+    IBAN = Column(String)
+    BIC_SWIFT = Column(String)
+    total_orders = Column(Integer)
+    preferred_contact_method = Column(String)
+    status = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
 
     def __str__(self):
-        return self.name
+        return f'[{self.id}] {self.name}'
+
+
+class DBConfiguration(base):
+    __tablename__ = 'configurations'
+
+    id = Column(Integer, primary_key=True)
+    conf_var = Column(String)
+    description = Column(String)
+    value = Column(String)
+    arguments = Column(String)
+    filters = Column(String)
+    to_env = Column(Boolean)
+    restriction_level = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'{self.conf_var}={self.value}'
+
+
+class DBContact(base):
+    __tablename__ = 'contacts'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    surname = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    position = Column(String)
+    department = Column(String)
+    company = Column(String)
+    relative_to = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id} - {self.name}] {self.email} - {self.phone}'
+
+
+class DBStorage(base):
+    __tablename__ = 'storages'
+
+    id = Column(Integer, primary_key=True)
+    id_contact = Column(Integer)
+    ref = Column(String)
+    location = Column(String)
+    storage_address = Column(String)
+    storage_city = Column(String)
+    storage_cp = Column(Integer)
+    capacity = Column(String)
+    status = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id}] {self.location}'
+
+
+class DBShipment(base):
+    __tablename__ = 'shipments'
+
+    id = Column(Integer, primary_key=True)
+    id_order = Column(Integer)
+    id_item = Column(Integer)
+    is_returnal = Column(Boolean)
+    date = Column(Date)
+    tracking = Column(String)
+    company = Column(String)
+    shipping_address = Column(String)
+    status = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id}] {self.shipping_address}'
+
+
+class DBMonetaryTransaction(base):
+    __tablename__ = 'monetary_transactions'
+
+    id = Column(Integer, primary_key=True)
+    id_actor = Column(Integer)
+    time = Column(DateTime)
+    ammount = Column(Double)
+    actor = Column(String)
+    reason = Column(String)
+    method = Column(String)
+    notes = Column(String)
+    insert_date = Column(DateTime)
+    update_date = Column(DateTime)
+    active = Column(Boolean)
+
+    def __str__(self):
+        return f'[{self.id}] {self.actor} - {self.ammount}'
 
 
 base.metadata.create_all(engine)
 
 """
 Ideal structure:
-
-T ---> Orders <--- 
-    id
-    id_customer
-    id_salesperson
-    date
-    status
-    subtotal
-    discount
-    price_total
-    price_net
-    payment_method
-    payment_status
-    billing_address
-    shipping_address
-    shipping_method
-    shipping_cost
-    shipping_date
-    shipping_eta
-    shipping_arrival
-    cancelled
-    cancel_reason
-    notes
-    insert_date
-    update_date
-    active
-    
-T ---> Employees <--- 
-    id
-    name
-    surname
-    email
-    phone
-    email
-    address
-    city
-    cp
-    country
-    hiring_date
-    department
-    position
-    reports_to
-    commission
-    total_sales
-    total_holidays
-    holidays_left
-    status
-    notes
-    update_date
-    active
-    
-T ---> Customers <--- 
-    id
-    name
-    surname
-    is_company
-    email
-    phone
-    billing_address
-    billing_cp
-    shipping_address
-    shipping_cp
-    shipping_country
-    credit_limit
-    IBAN
-    BIC_SWIFT
-    total_sales
-    preferred_contact_method
-    status
-    notes
-    insert_date
-    update_date
-    active
-    
-T ---> Configurations <--- 
-    id
-    conf_var
-    description
-    value
-    arguments
-    filters
-    to_env
-    restriction_level
-    insert_date
-    update_date
-    active
-    
-T ---> Contacts <--- 
-    id
-    name
-    surname
-    email
-    phone
-    position
-    department
-    company
-    relative_to
-    notes
-    insert_date
-    update_date
-    
-T ---> Storages <--- 
-    id
-    id_contact
-    ref
-    location
-    storage_address
-    storage_city
-    storage_cp
-    capacity
-    status
-    notes
-    insert_date
-    update_date
-    active
-
-T ---> Shipments <--- 
-    id
-    id_order
-    id_item
-    date
-    tracking
-    company
-    shipping_address
-    status
-    notes
-    insert_date
-    update_date
-    active
-    
-T ---> Monetary_transactions <--- 
-    id
-    id_actor
-    time
-    date
-    ammount_recieved
-    actor
-    reason
-    method
-    notes
-    insert_date
-    update_date
-    active
     
 T ---> CheckIn <--- 
     id
@@ -346,8 +346,7 @@ T ---> Internal_code_reports <---
     timedate
     message
     metadata
-    is_warning
-    is_fatal
+    severity
     active
 
     
