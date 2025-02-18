@@ -7,37 +7,44 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 load_dotenv(Path('../.cfg/.env'))
+
+if os.getenv("DB_ONLINE").lower() == 'true':
+    db_mode = 'PROD'
+else:
+    db_mode = 'LOCAL'
+
 match engine_selection := os.getenv("DB_ENGINE"):
     case "mysql":
-        usr = os.getenv("DB_USER")
-        pwd = os.getenv("DB_PASSWORD")
-        adr = os.getenv("DB_CON_ADDR")
-        por = os.getenv("DB_PORT")
-        sch = os.getenv("DB_NAME")
+        usr = os.getenv(f"DB_{db_mode}_USER")
+        pwd = os.getenv(f"DB_{db_mode}_PASSWORD")
+        adr = os.getenv(f"DB_{db_mode}_CON_ADDR")
+        por = os.getenv(f"DB_{db_mode}_PORT")
+        sch = os.getenv(f"DB_{db_mode}_NAME")
+
         engine = create_engine(f'mysql+pymysql://{usr}:{pwd}@{adr}:{por}/{sch}', echo=True)
 
     case "sqlite":
-        uri = os.getenv("DB_LOCATION")
-        sch = os.getenv("DB_NAME")
+        uri = os.getenv(f"DB_{db_mode}_LOCATION")
+        sch = os.getenv(f"DB_{db_mode}_NAME")
         engine = create_engine(f'sqlite:///{uri}/{sch}.db', echo=True)
 
     case "postgresql":
-        usr = os.getenv("DB_USER")
-        pwd = os.getenv("DB_PASSWORD")
-        adr = os.getenv("DB_CON_ADDR")
-        por = os.getenv("DB_PORT")
-        sch = os.getenv("DB_NAME")
+        usr = os.getenv(f"DB_{db_mode}_USER")
+        pwd = os.getenv(f"DB_{db_mode}_PASSWORD")
+        adr = os.getenv(f"DB_{db_mode}_CON_ADDR")
+        por = os.getenv(f"DB_{db_mode}_PORT")
+        sch = os.getenv(f"DB_{db_mode}_NAME")
         engine = create_engine(f'postgresql://{usr}:{pwd}@{adr}:{por}/{sch}', echo=True)
 
     case "sqlserver":
         # We may deprecate the ability to connect to MSSQLS because they're a bunch of fucks and
         # drivers are un-fucking-reliable and complicated as hell and will cause more problems than anything else
-        usr = os.getenv("DB_USER")
-        pwd = os.getenv("DB_PASSWORD")
-        adr = os.getenv("DB_CON_ADDR")
-        por = os.getenv("DB_PORT")
-        sch = os.getenv("DB_NAME")
-        ver = os.getenv("DB_MSSQL_VER")
+        usr = os.getenv(f"DB_{db_mode}_USER")
+        pwd = os.getenv(f"DB_{db_mode}_PASSWORD")
+        adr = os.getenv(f"DB_{db_mode}_CON_ADDR")
+        por = os.getenv(f"DB_{db_mode}_PORT")
+        sch = os.getenv(f"DB_{db_mode}_NAME")
+        ver = os.getenv(f"DB_{db_mode}_MSSQL_VER")
         engine = create_engine(f'mssql+pyodbc://{usr}:{pwd}@{adr}:{por}/{sch}?driver=ODBC+Driver+{ver}+for+SQL+Server',
                                echo=True)
 
