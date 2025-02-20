@@ -3,17 +3,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, Integer, Double, Date, String, Boolean, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-load_dotenv(Path('../.cfg/.env'))
+if not load_dotenv(f'{os.getcwd()}/backend/.cfg/.env', override=True):
+    print(".env does not exist")
+else:
+    print(".env loaded")
 
-if os.getenv("DB_ONLINE").lower() == 'true':
+if os.getenv("DB_ONLINE", "false").strip().lower() == 'true':
     db_mode = 'PROD'
 else:
     db_mode = 'LOCAL'
 
-match engine_selection := os.getenv("DB_ENGINE"):
+match engine_selection := os.getenv(f"DB_{db_mode}_ENGINE"):
     case "mysql":
         usr = os.getenv(f"DB_{db_mode}_USER")
         pwd = os.getenv(f"DB_{db_mode}_PASSWORD")
@@ -34,7 +36,7 @@ match engine_selection := os.getenv("DB_ENGINE"):
         adr = os.getenv(f"DB_{db_mode}_CON_ADDR")
         por = os.getenv(f"DB_{db_mode}_PORT")
         sch = os.getenv(f"DB_{db_mode}_NAME")
-        engine = create_engine(f'postgresql://{usr}:{pwd}@{adr}:{por}/{sch}', echo=True)
+        engine = create_engine(f'postgresql+psycopg://{usr}:{pwd}@{adr}:{por}/{sch}', echo=True)
 
     case "sqlserver":
         # We may deprecate the ability to connect to MSSQLS because they're a bunch of fucks and
